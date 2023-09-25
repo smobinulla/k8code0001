@@ -1,0 +1,99 @@
+resource "aws_security_group" "Nlb_access_sg" {
+  vpc_id      = aws_vpc.SWARM-VPC.id
+  name        = "Nelwork-balancer"
+  description = "web access myapps"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_lb" "docker_swarm_nlb" {
+  name = "docker-swarm-nlb"
+
+  load_balancer_type = "network"
+
+  security_groups = [ aws_security_group.Nlb_access_sg.id ]
+
+  subnets = [ aws_subnet.SWARM-VPC-Pub-subnet.id ]
+
+  enable_cross_zone_load_balancing = true
+}
+#Then, we need to configure the listener using the aws_lb_listener resource and the target group (the destination) without setting any actual targets:
+
+resource "aws_lb_target_group" "myapp1-tg" {
+  name     = "myapp1-tg"
+  port     = 80
+  protocol = "TCP"
+  vpc_id   = aws_vpc.SWARM-VPC.id
+  target_type        = "instance"
+  health_check {
+    port     = 80
+    protocol = "TCP"
+  }
+
+/* resource "aws_lb_target_group_attachment" "tg_attachment_nlb" { 
+     target_group_arn = aws_lb_target_group.myapp1-tg.arn
+    target_id        = "i-0cbbbbbbbb12f"
+    port             = 80
+} */
+
+
+
+/* resource "aws_lb_target_group" "myapp2-tg" {
+  name     = "myapp2-tg"
+  port     = 8000
+  protocol = "TCP"
+  vpc_id   = aws_vpc.SWARM-VPC.id
+  target_type        = "instance"
+
+  health_check {
+    port     = 8000
+    protocol = "TCP"
+  }
+} */
+
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+/* resource "aws_lb_listener" "docker_swarm_listener" {
+  load_balancer_arn = aws_lb.docker_swarm_nlb.id
+  #port              = "80"
+  lb_port            = "80"
+  #protocol          = "TCP"
+  instance_port      =  "80"
+  instance_protocal  =  "80"
+
+  default_action {
+    target_group_arn = aws_lb_target_group.myapp1-tg.id
+    type             = "forward"
+  }
+} */
+
+
+
+
+#output "docker_swarm_nlb_dns_name" {
+ # value = aws_alb.docker_swarm_nlb.dns_name
+#}
+
+  output "docker_swarm_nlb_dns_name" {
+  value = aws_lb.docker_swarm_nlb.dns_name
+}
+
+
+
+
