@@ -6,13 +6,13 @@ variable "region" {
  variable "access_key" {
   description = "access-key"
     type        = string
-  default     = "AKIAUY4LVI5T7NKDKZE6"
+  default     = "xxxxxxx"
 }
 
 variable "secret_key" {
   description = "secret-key"
     type        = string
-  default     = "Sdt+psaowq/7pWZrNP6dt1+a+YnXdQmQWnLG5Q1c"
+  default     = "xxxxx"
 }
  
 
